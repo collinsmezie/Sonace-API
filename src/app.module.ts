@@ -16,10 +16,10 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: 'dpg-cu3vbi1u0jms73dpuf70-a',
       port: 5432,
-      username: 'postgres',
-      password: 'postgres',
+      username: 'sonace_development_user',
+      password: 'QpcVjOjDCojlD3LwypFme4AdsMEgcuJK',
       database: 'sonace_development',
       entities: [ User ],
       autoLoadEntities: true,
