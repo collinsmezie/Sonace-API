@@ -14,7 +14,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RolesGuard } from '../roles.guard';
-import { Public } from '../common/decorators/public.decorator';
+// import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 // import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -25,22 +25,19 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  // @Roles(['admin'])
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  @Public()
   @Get()
   @Roles(['admin'])
   findAll() {
     return this.usersService.findAll();
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.usersService.findOneBy(id);
   }
 
   @Patch(':id')
@@ -48,7 +45,6 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     // return this.usersService.remove(id);

@@ -39,12 +39,31 @@ let UsersService = class UsersService {
         }
         return user;
     }
+    async findOneBy(id) {
+        const user = await this.usersRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_2.NotFoundException(`User not found - Provide a valid id`);
+        }
+        return user;
+    }
     async update(id, updateUserDto) {
+        const user = await this.usersRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_2.NotFoundException(`User not found - Provide a valid id`);
+        }
         await this.usersRepository.update(id, updateUserDto);
         return this.usersRepository.findOneBy({ id });
     }
     async remove(id) {
-        await this.usersRepository.delete(id);
+        const user = await this.usersRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_2.NotFoundException(`User not found - Provide a valid id`);
+        }
+        const deleteResult = await this.usersRepository.delete(id);
+        if (deleteResult.affected === 0) {
+            throw new common_2.NotFoundException(`User not found - Provide a valid id`);
+        }
+        return;
     }
 };
 exports.UsersService = UsersService;

@@ -18,7 +18,6 @@ const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const roles_guard_1 = require("../roles.guard");
-const public_decorator_1 = require("../common/decorators/public.decorator");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 let UsersController = class UsersController {
     constructor(usersService) {
@@ -31,7 +30,7 @@ let UsersController = class UsersController {
         return this.usersService.findAll();
     }
     findOne(id) {
-        return this.usersService.findOne(id);
+        return this.usersService.findOneBy(id);
     }
     update(id, updateUserDto) {
         return this.usersService.update(id, updateUserDto);
@@ -50,7 +49,6 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "create", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     (0, roles_decorator_1.Roles)(['admin']),
     __metadata("design:type", Function),

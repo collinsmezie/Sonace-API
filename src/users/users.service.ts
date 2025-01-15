@@ -27,6 +27,8 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
+
+  // findOne handler for login use
   async findOne(email: string): Promise<User> {
 
     // Check if the user exists in the database
@@ -40,13 +42,59 @@ export class UsersService {
     return user;
   }
 
+  // findOne handler for user retrieval
+  async findOneBy(id: string): Promise<User> {
+    // return this.usersRepository.findOne({ where: { id } });
+
+    // Check if the user exists in the database
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      // If no user is found, throw a NotFoundException
+      throw new NotFoundException(`User not found - Provide a valid id`);
+    }
+
+    return user;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    // await this.usersRepository.update(id, updateUserDto);
+    // return this.usersRepository.findOneBy({ id });
+
+    // Check if the user exists in the database
+    const user = await this.usersRepository.findOne({ where: { id } }); 
+
+    if (!user) {
+      // If no user is found, throw a NotFoundException
+      throw new NotFoundException(`User not found - Provide a valid id`);
+    }
+
+    // Proceed with update
     await this.usersRepository.update(id, updateUserDto);
+
+    // Return the updated user
     return this.usersRepository.findOneBy({ id });
+
   }
 
   async remove(id: string): Promise<void> {
-    await this.usersRepository.delete(id);
+    // Check if the user exists in the database
+    const user = await this.usersRepository.findOne({ where: { id } });
+
+    if (!user) {
+      // If no user is found, throw a NotFoundException
+      throw new NotFoundException(`User not found - Provide a valid id`);
+    }
+
+    // Proceed with deletion
+    const deleteResult = await this.usersRepository.delete(id);
+
+    if (deleteResult.affected === 0) {
+      // In case deleteResult.affected is 0 (meaning nothing was deleted)
+      throw new NotFoundException(`User not found - Provide a valid id`);
+    }
+
+    return;
   }
 }
 
