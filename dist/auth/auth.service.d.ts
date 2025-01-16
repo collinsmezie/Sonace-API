@@ -9,7 +9,7 @@ export declare class AuthService {
     validateUser(email: string, pass: string): Promise<any>;
     register(createUserDto: CreateUserDto): Promise<{
         message: string;
-        user: import("../users/entities/user.entity").User;
+        user: CreateUserDto & import("../users/entities/user.entity").User;
     }>;
     login(loginDto: LoginDto): Promise<{
         message: string;

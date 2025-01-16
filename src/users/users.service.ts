@@ -14,13 +14,17 @@ export class UsersService {
   ) { }
 
   async create(createUserDto: CreateUserDto) {
-    const user = new User();
 
-    user.username = createUserDto.username;
-    user.email = createUserDto.email;
-    user.password = createUserDto.password;
+    // Check if the user exists in the database
+    const user = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
 
-    return this.usersRepository.save(user);
+    if (user) {
+      // If user is found, throw a BadRequestException
+      throw new NotFoundException(`User with this email already exists - Provide a unique email`);
+    }
+
+    // Proceed with user creation
+    return this.usersRepository.save(createUserDto);
   }
 
   async findAll(): Promise<User[]> {
@@ -58,8 +62,6 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    // await this.usersRepository.update(id, updateUserDto);
-    // return this.usersRepository.findOneBy({ id });
 
     // Check if the user exists in the database
     const user = await this.usersRepository.findOne({ where: { id } }); 
@@ -88,11 +90,6 @@ export class UsersService {
 
     // Proceed with deletion
     const deleteResult = await this.usersRepository.delete(id);
-
-    if (deleteResult.affected === 0) {
-      // In case deleteResult.affected is 0 (meaning nothing was deleted)
-      throw new NotFoundException(`User not found - Provide a valid id`);
-    }
 
     return;
   }

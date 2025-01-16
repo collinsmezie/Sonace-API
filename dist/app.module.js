@@ -32,10 +32,10 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: 'dpg-cu3vbi1u0jms73dpuf70-a',
+                host: 'localhost',
                 port: 5432,
-                username: 'sonace_development_user',
-                password: 'QpcVjOjDCojlD3LwypFme4AdsMEgcuJK',
+                username: 'postgres',
+                password: 'postgres',
                 database: 'sonace_development',
                 entities: [user_entity_1.User],
                 autoLoadEntities: true,

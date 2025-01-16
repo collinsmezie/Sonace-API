@@ -23,11 +23,11 @@ let UsersService = class UsersService {
         this.usersRepository = usersRepository;
     }
     async create(createUserDto) {
-        const user = new user_entity_1.User();
-        user.username = createUserDto.username;
-        user.email = createUserDto.email;
-        user.password = createUserDto.password;
-        return this.usersRepository.save(user);
+        const user = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
+        if (user) {
+            throw new common_2.NotFoundException(`User with this email already exists - Provide a unique email`);
+        }
+        return this.usersRepository.save(createUserDto);
     }
     async findAll() {
         return this.usersRepository.find();
@@ -60,9 +60,6 @@ let UsersService = class UsersService {
             throw new common_2.NotFoundException(`User not found - Provide a valid id`);
         }
         const deleteResult = await this.usersRepository.delete(id);
-        if (deleteResult.affected === 0) {
-            throw new common_2.NotFoundException(`User not found - Provide a valid id`);
-        }
         return;
     }
 };
