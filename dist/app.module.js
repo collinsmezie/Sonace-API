@@ -19,6 +19,8 @@ const core_1 = require("@nestjs/core");
 const jwt_auth_guard_1 = require("./auth/jwt-auth.guard");
 const users_controller_1 = require("./users/users.controller");
 const config_1 = require("@nestjs/config");
+const posts_module_1 = require("./posts/posts.module");
+const pinned_locations_module_1 = require("./pinned-locations/pinned-locations.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer
@@ -46,7 +48,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-            }),
+            }), posts_module_1.PostsModule, pinned_locations_module_1.PinnedLocationsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

@@ -72,6 +72,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { UsersController } from './users/users.controller';
 import { ConfigModule } from '@nestjs/config';
+import { PostsModule } from './posts/posts.module';
+import { PinnedLocationsModule } from './pinned-locations/pinned-locations.module';
 
 @Module({
   imports: [
@@ -91,7 +93,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule, 
     ConfigModule.forRoot({
       isGlobal: true, // Makes the config globally available
-    }),
+    }), PostsModule, PinnedLocationsModule,
   ],
   controllers: [AppController],
   providers: [
