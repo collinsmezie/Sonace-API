@@ -30,13 +30,14 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            config_1.ConfigModule.forRoot({ isGlobal: true }),
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'postgres',
                 host: 'localhost',
                 port: 5432,
                 username: 'postgres',
                 password: 'postgres',
-                database: 'sonace_development',
+                database: 'sonace_db',
                 entities: [user_entity_1.User],
                 autoLoadEntities: true,
                 logging: true,
@@ -44,9 +45,6 @@ exports.AppModule = AppModule = __decorate([
             }),
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-            }),
         ],
         controllers: [app_controller_1.AppController],
         providers: [
