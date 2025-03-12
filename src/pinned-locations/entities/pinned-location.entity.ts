@@ -10,12 +10,12 @@ export class PinnedLocation {
   name: string;
 
   @Column('float')
-  latitude: number;
+  latitude: string;
 
   @Column('float')
-  longitude: number;
+  longitude: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
   @ManyToOne(() => User, (user) => user.pinnedLocations, { eager: true })

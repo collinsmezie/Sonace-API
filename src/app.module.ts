@@ -3,14 +3,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';  
-import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { User } from './users/entities/user.entity';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 // import { logger } from './middlewares/logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { UsersController } from './users/users.controller';
 import { ConfigModule } from '@nestjs/config';
+import { User } from './users/entities/user.entity';
+import { PinnedLocation } from './pinned-locations/entities/pinned-location.entity';
+import { Post } from './posts/entities/post.entity';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -22,13 +25,14 @@ import { ConfigModule } from '@nestjs/config';
       username: 'postgres',
       password: 'postgres',
       database: 'sonace_db',
-      entities: [ User ],
+      entities: [ User, Post, PinnedLocation ],
       autoLoadEntities: true,
       logging: true,
       synchronize: true
     }),
     AuthModule,
     UsersModule, 
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [

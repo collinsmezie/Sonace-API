@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { PinnedLocation } from 'src/pinned-locations/entities/pinned-location.entity';
 
@@ -14,14 +14,17 @@ export class Post {
   description: string;
 
   @Column()
-  media_url: string; // S3 URL of the image or video
-
-  @CreateDateColumn()
-  created_at: Date;
+  post_url: string; // S3 URL of the image or video
 
   @ManyToOne(() => User, (user) => user.posts, { eager: true })
   user: User;
 
   @ManyToOne(() => PinnedLocation, (location) => location.id, { eager: true })
   location: PinnedLocation;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

@@ -2,8 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { logger } from './middlewares/logger.middleware';
 import { ValidationPipe } from '@nestjs/common';
-// import { loadConfig } from 'aws-ssm';
-
+import { loadConfig } from './config/aws-ssm';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
