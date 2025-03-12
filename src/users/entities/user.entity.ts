@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { PinnedLocation } from '../../pinned-locations/entities/pinned-location.entity';
+import { Post } from '../../posts/entities/post.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -20,4 +22,11 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date; // Automatically updated when the entity is updated
+
+  @OneToMany(() => PinnedLocation, (location) => location.created_by)
+  pinnedLocations: PinnedLocation[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
+
 }
