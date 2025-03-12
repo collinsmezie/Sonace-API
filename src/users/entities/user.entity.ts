@@ -9,7 +9,13 @@ export class User {
   id: string; // This is the primary key
 
   @Column({ type: 'varchar', nullable: false })
+  fullname: string;
+
+  @Column({ type: 'varchar', unique: true, nullable: true })
   username: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  profile_image: string;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
   email: string;

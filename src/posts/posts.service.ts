@@ -24,7 +24,7 @@
 //   }
 // }
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
@@ -33,6 +33,7 @@ import { PinnedLocation } from './../pinned-locations/entities/pinned-location.e
 import { S3Client, PutObjectCommand, PutObjectCommandInput, ObjectCannedACL } from '@aws-sdk/client-s3';
 import { s3 } from '../config/s3.config';
 import { v4 as uuidv4 } from 'uuid';
+
 
 @Injectable()
 export class PostsService {
@@ -56,22 +57,27 @@ export class PostsService {
     longitude: string,
     locationName?: string,
     description?: string,
-  ): Promise<{ message: string; postId: string }> {
+  ): Promise<{ message: string; postId: string; postImageUrl: string }> {
     const key = `uploads/${uuidv4()}-${file.originalname}`;
 
-    const uploadParams: PutObjectCommandInput = {
-      Bucket: this.bucketName,
-      Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-      // ACL: ObjectCannedACL.public_read,
-    };
+    // const uploadParams: PutObjectCommandInput = {
+    //   Bucket: this.bucketName,
+    //   Key: key,
+    //   Body: file.buffer,
+    //   ContentType: file.mimetype,
+    //   // ACL: ObjectCannedACL.public_read,
+    // };
     
-    await s3.send(new PutObjectCommand(uploadParams));
+    // await s3.send(new PutObjectCommand(uploadParams));
 
+    
     // Ensure the user exists
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new Error('User not found');
+
+
+    // Upload the file to S3
+    const postImageUrl = await this.uploadToS3(file, key);
 
     // Check if the location exists
     let location = await this.locationRepository.findOne({
@@ -104,10 +110,31 @@ export class PostsService {
     return {
       message: 'Post uploaded successfully',
       postId: savedPost.id,
+      postImageUrl
     };
   }
 
   getFullPostUrl(post: Post): string {
     return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${post.post_url}`;
   }
+
+  private async uploadToS3(file: Express.Multer.File, key: string): Promise<string> {
+    try {
+      const uploadParams: PutObjectCommandInput = {
+        Bucket: this.bucketName,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+      };
+
+      await s3.send(new PutObjectCommand(uploadParams));
+
+      // Return the full URL
+      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
+    } catch (error) {
+      console.error('Error uploading profile image to S3:', error);
+      throw new InternalServerErrorException('Failed to upload profile image. Please try again later.');
+    }
+  }
+
 }
