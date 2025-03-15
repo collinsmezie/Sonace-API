@@ -6,6 +6,7 @@ import { loadConfig } from './config/aws-ssm';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
   // const config = await loadConfig();
   // console.log("Config from AWS", config);
     // Enable global validation pipe

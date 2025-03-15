@@ -13,8 +13,8 @@ export class Post {
   @Column({ nullable: true })
   description: string;
 
-  @Column()
-  post_url: string; // S3 URL of the image or video
+  @Column("text", { array: true })
+  post_urls: string[]; // S3 URL of the file
 
   @ManyToOne(() => User, (user) => user.posts, { eager: true })
   user: User;

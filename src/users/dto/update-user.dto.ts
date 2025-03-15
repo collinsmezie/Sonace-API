@@ -1,18 +1,25 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
-
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {
+  @IsOptional()
+  @IsString({ message: 'Username must be a string' })
+  username?: string;
 
-  @IsNotEmpty({ message: 'Username cannot be empty' })
-  username: string;
+  @IsOptional()
+  @IsString({ message: 'Full name must be a string' })
+  fullname?: string;
 
-  @IsNotEmpty({ message: 'Email cannot be empty' })
+  @IsOptional()
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
-  
-  @IsNotEmpty({ message: 'Password cannot be empty' })
+  email?: string;
+
+  @IsOptional()
   @MinLength(6, { message: 'Password should be at least 6 characters' })
-  password: string;
+  password?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Profile image must be a string' })
+  profile_image?: string;
 }

@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Unique } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
+@Unique(['latitude', 'longitude', 'created_by'])
 @Entity('pinned_locations')
 export class PinnedLocation {
   @PrimaryGeneratedColumn('uuid')
