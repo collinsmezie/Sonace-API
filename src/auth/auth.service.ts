@@ -46,7 +46,7 @@ export class AuthService {
       throw new BadRequestException(user.message);
     }
   
-    console.log("Logged In User", user.fullname);
+    console.log("Logged In User", user.email);
   
     const payload = { email: user.email, sub: user.id };
     return {

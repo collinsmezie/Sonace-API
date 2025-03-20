@@ -8,13 +8,13 @@ export class Post {
   id: string;
 
   @Column()
-  title: string;
+  postText: string;
 
   @Column({ nullable: true })
-  description: string;
+  markerImageUrl: string;
 
   @Column("text", { array: true })
-  post_urls: string[]; // S3 URL of the file
+  postUrls: string[]; // S3 URL of the file
 
   @ManyToOne(() => User, (user) => user.posts, { eager: true })
   user: User;
@@ -23,8 +23,8 @@ export class Post {
   location: PinnedLocation;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }

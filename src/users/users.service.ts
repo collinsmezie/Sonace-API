@@ -32,15 +32,15 @@ export class UsersService {
   
     // If a file is uploaded, update profile image
     if (file) {
-      if (user.profile_image) {
-        await this.deleteFromS3(user.profile_image);
+      if (user.profileImage) {
+        await this.deleteFromS3(user.profileImage);
       }
   
       const key = `profile-images/${uuidv4()}-${file.originalname}`;
       profileImageUrl = await this.uploadToS3(file, key);
       
       // Add profile image to the update data
-      updateUserDto = { ...updateUserDto, profile_image: key };
+      updateUserDto = { ...updateUserDto, profileImage: key };
     }
   
     await this.usersRepository.update(userId, updateUserDto);
