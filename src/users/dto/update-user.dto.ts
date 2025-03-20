@@ -8,8 +8,8 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   username?: string;
 
   @IsOptional()
-  @IsString({ message: 'Full name must be a string' })
-  fullname?: string;
+  @IsString({ message: 'Profile name must be a string' })
+  profileName?: string;
 
   @IsOptional()
   @IsEmail({}, { message: 'Invalid email format' })
@@ -19,7 +19,12 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @MinLength(6, { message: 'Password should be at least 6 characters' })
   password?: string;
 
+  //phone number
+  @IsOptional()
+  @IsString({ message: 'Phone number must be a string' })
+  phoneNumber?: string;
+
   @IsOptional()
   @IsString({ message: 'Profile image must be a string' })
-  profile_image?: string;
+  profileImage?: string;
 }

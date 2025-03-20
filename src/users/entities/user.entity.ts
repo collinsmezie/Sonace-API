@@ -8,20 +8,23 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string; // This is the primary key
 
-  @Column({ type: 'varchar', nullable: false })
-  fullname: string;
+  @Column({ type: 'varchar', nullable: true })
+  profileName: string;
 
   @Column({ type: 'varchar', unique: true, nullable: true })
   username: string;
 
   @Column({ type: 'varchar', nullable: true })
-  profile_image: string;
+  profileImage: string;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
   email: string;
 
   @Column({ type: 'varchar', nullable: false })
   password: string;
+
+  @Column({ type: 'varchar', nullable: false })
+  phoneNumber: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date; // Automatically set when the entity is created
