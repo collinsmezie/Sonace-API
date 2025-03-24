@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import e from 'express';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -20,4 +21,10 @@ export class CreatePostDto {
   @IsOptional()
   @IsString()
   locationName?: string;
+
+  //markerImage, a base64 string
+  @IsNotEmpty()
+  @IsString()
+  markerImage: string;
+
 }

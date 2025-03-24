@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, Unique } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
-@Unique(['latitude', 'longitude', 'created_by'])
+@Unique(['latitude', 'longitude', 'createdBy'])
 @Entity('pinned_locations')
 export class PinnedLocation {
   @PrimaryGeneratedColumn('uuid')
@@ -17,8 +17,8 @@ export class PinnedLocation {
   longitude: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  created_at: Date;
+  createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.pinnedLocations, { eager: true })
-  created_by: User;
+  createdBy: User;
 }
