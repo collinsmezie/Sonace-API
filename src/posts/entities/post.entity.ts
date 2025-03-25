@@ -7,7 +7,7 @@ export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column("text", {nullable: true})
   postText: string;
 
   @Column({ nullable: true })
@@ -16,10 +16,10 @@ export class Post {
   @Column("text", { array: true })
   postUrls: string[]; // S3 URL of the file
 
-  @ManyToOne(() => User, (user) => user.posts, { eager: true })
+  @ManyToOne(() => User, (user) => user.posts)
   user: User;
 
-  @ManyToOne(() => PinnedLocation, (location) => location.id, { eager: true })
+  @ManyToOne(() => PinnedLocation, (location) => location.id)
   location: PinnedLocation;
 
   @CreateDateColumn()
@@ -27,4 +27,7 @@ export class Post {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column("text", { nullable: true })
+  markerImage: string;
 }
