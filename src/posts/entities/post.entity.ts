@@ -7,7 +7,7 @@ export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({nullable: true})
+  @Column("text", {nullable: true})
   postText: string;
 
   @Column({ nullable: true })
@@ -28,7 +28,6 @@ export class Post {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  //markerimage, a base64 string stored in the database using the bytea data type
-  @Column({ type: 'bytea', nullable: true })
+  @Column("text", { nullable: true })
   markerImage: string;
 }

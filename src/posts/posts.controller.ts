@@ -114,14 +114,6 @@ export class PostsController {
       throw new BadRequestException('No post files uploaded');
     }
 
-    // Decode base64 markerImage
-    const matches = markerImage.match(/^data:(.+);base64,(.+)$/);
-
-    if (!matches) {
-      throw new BadRequestException('Invalid base64 format for marker image');
-    }
-
-
     const result = await this.postsService.uploadPosts(
       files.files, // Post files
       userId,
@@ -129,7 +121,7 @@ export class PostsController {
       latitude.toString(),
       longitude.toString(),
       locationName,
-      markerImage, // Base64 marker image
+      markerImage,
     );
 
     return result;

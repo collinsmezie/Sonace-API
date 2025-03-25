@@ -22,7 +22,6 @@ export class CreatePostDto {
   @IsString()
   locationName?: string;
 
-  //markerImage, a base64 string
   @IsNotEmpty()
   @IsString()
   markerImage: string;
