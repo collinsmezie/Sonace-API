@@ -1,123 +1,43 @@
-// import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-// import { AppController } from './app.controller';
-// import { AppService } from './app.service';
-// import { UsersModule } from './users/users.module';
-
-// import { TypeOrmModule } from '@nestjs/typeorm';  
-// import { LoggerMiddleware } from './common/middlewares/logger.middleware';
-// import { User } from './users/entities/user.entity';
-// import { Post } from './posts/entities/post.entity';
-// import { PinnedLocation } from './pinned-locations/entities/pinned-location.entity';
-// // import { logger } from './middlewares/logger.middleware';
-// import { AuthModule } from './auth/auth.module';
-// import { APP_GUARD } from '@nestjs/core';
-// import { JwtAuthGuard } from './auth/jwt-auth.guard';
-// import { UsersController } from './users/users.controller';
-// import { ConfigModule } from '@nestjs/config';
-// import { PostsModule } from './posts/posts.module';
-// import * as dotenv from 'dotenv';
-
-// dotenv.config();
-
-// @Module({
-//   imports: [
-//     ConfigModule.forRoot({ isGlobal: true }),
-//     TypeOrmModule.forRoot({
-//       type: 'postgres',
-//       host: process.env.RDS_HOST, // RDS Endpoint
-//       port: Number(process.env.DB_PORT) || 5432, // Default PostgreSQL port
-//       username: process.env.DB_USERNAME,
-//       password: process.env.DB_PASSWORD,
-//       database: process.env.DB_NAME,
-//       entities: [User, Post, PinnedLocation],
-//       autoLoadEntities: true,
-//       logging: true,
-//       synchronize: true, // Consider disabling in production
-//       ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false, // For RDS with SSL
-//     }),
-//     AuthModule,
-//     UsersModule,
-//     PostsModule
-//   ],
-//   controllers: [AppController],
-//   providers: [
-//   AppService,  
-//   {
-//     provide: APP_GUARD,
-//     useClass: JwtAuthGuard,
-//   }
-//   ],
-// })
-
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer
-//       .apply(LoggerMiddleware)
-//       // .forRoutes({ path: 'sessions', method: RequestMethod.POST });
-//       // .exclude(
-//       //   { path: 'sessions', method: RequestMethod.GET },
-//       //   { path: 'sessions/:id', method: RequestMethod.DELETE }
-//       // )
-//       .forRoutes(UsersController);
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
+
 import { TypeOrmModule } from '@nestjs/typeorm';  
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { User } from './users/entities/user.entity';
+import { Post } from './posts/entities/post.entity';
+import { PinnedLocation } from './pinned-locations/entities/pinned-location.entity';
 // import { logger } from './middlewares/logger.middleware';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { UsersController } from './users/users.controller';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './users/entities/user.entity';
-import { PinnedLocation } from './pinned-locations/entities/pinned-location.entity';
-import { Post } from './posts/entities/post.entity';
 import { PostsModule } from './posts/posts.module';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // ✅ Load config first
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'sonace_db',
-      entities: [ User, Post, PinnedLocation ],
+      host: process.env.RDS_HOST, // RDS Endpoint
+      port: Number(process.env.DB_PORT) || 5432, // Default PostgreSQL port
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      entities: [User, Post, PinnedLocation],
       autoLoadEntities: true,
       logging: true,
-      synchronize: true
+      synchronize: true, // Consider disabling in production
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false, // For RDS with SSL
     }),
     AuthModule,
-    UsersModule, 
-    PostsModule,
+    UsersModule,
+    PostsModule
   ],
   controllers: [AppController],
   providers: [
@@ -141,6 +61,86 @@ export class AppModule implements NestModule {
       .forRoutes(UsersController);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+// import { AppController } from './app.controller';
+// import { AppService } from './app.service';
+// import { UsersModule } from './users/users.module';
+// import { TypeOrmModule } from '@nestjs/typeorm';  
+// import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+// // import { logger } from './middlewares/logger.middleware';
+// import { AuthModule } from './auth/auth.module';
+// import { APP_GUARD } from '@nestjs/core';
+// import { JwtAuthGuard } from './auth/jwt-auth.guard';
+// import { UsersController } from './users/users.controller';
+// import { ConfigModule } from '@nestjs/config';
+// import { User } from './users/entities/user.entity';
+// import { PinnedLocation } from './pinned-locations/entities/pinned-location.entity';
+// import { Post } from './posts/entities/post.entity';
+// import { PostsModule } from './posts/posts.module';
+
+// @Module({
+//   imports: [
+//     ConfigModule.forRoot({ isGlobal: true }), // ✅ Load config first
+//     TypeOrmModule.forRoot({
+//       type: 'postgres',
+//       host: 'localhost',
+//       port: 5432,
+//       username: 'postgres',
+//       password: 'postgres',
+//       database: 'sonace_db',
+//       entities: [ User, Post, PinnedLocation ],
+//       autoLoadEntities: true,
+//       logging: true,
+//       synchronize: true
+//     }),
+//     AuthModule,
+//     UsersModule, 
+//     PostsModule,
+//   ],
+//   controllers: [AppController],
+//   providers: [
+//   AppService,  
+//   {
+//     provide: APP_GUARD,
+//     useClass: JwtAuthGuard,
+//   }
+//   ],
+// })
+
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer
+//       .apply(LoggerMiddleware)
+//       // .forRoutes({ path: 'sessions', method: RequestMethod.POST });
+//       // .exclude(
+//       //   { path: 'sessions', method: RequestMethod.GET },
+//       //   { path: 'sessions/:id', method: RequestMethod.DELETE }
+//       // )
+//       .forRoutes(UsersController);
+//   }
+// }
 
 
 
