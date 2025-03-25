@@ -7,7 +7,7 @@ export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column("text", {nullable: true})
   postText: string;
 
   @Column({ nullable: true })
@@ -27,4 +27,7 @@ export class Post {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column("text", { nullable: true })
+  markerImage: string;
 }

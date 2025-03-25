@@ -32,7 +32,7 @@ export class User {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date; // Automatically updated when the entity is updated
 
-  @OneToMany(() => PinnedLocation, (location) => location.created_by)
+  @OneToMany(() => PinnedLocation, (location) => location.createdBy)
   pinnedLocations: PinnedLocation[];
 
   @OneToMany(() => Post, (post) => post.user)
