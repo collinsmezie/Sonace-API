@@ -159,6 +159,7 @@ import { PinnedLocation } from './../pinned-locations/entities/pinned-location.e
 import { S3Client, PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { s3 } from '../config/s3.config';
 import { v4 as uuidv4 } from 'uuid';
+import { PostResponseDto } from './dto/post-response.dto';
 
 
 @Injectable()
@@ -179,7 +180,7 @@ export class PostsService {
     const posts = await this.postRepository.find({
       relations: ['user', 'location'], // Ensure related data is fetched
     });
-  
+
     return posts.map(post => ({
       postId: post.id,
       markerImage: post.markerImageUrl || post.markerImage || null,
@@ -188,7 +189,31 @@ export class PostsService {
       longitude: post.location?.longitude || null,
     }));
   }
-  
+
+  async fetchPostById(id: string): Promise<PostResponseDto | null> {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['user', 'location'], // Ensure user and location are loaded
+    });
+
+    if (!post) throw new NotFoundException('Post not found');
+
+    // Validate related entities before destructuring
+    const { postText, postUrls, location, user } = post;
+
+    if (!user) throw new NotFoundException('User associated with post not found');
+    if (!location) throw new NotFoundException('Location associated with post not found');
+
+    return {
+      userId: user.id, // Ensure userId matches the correct property name
+      postText,
+      locationName: location.name ?? 'Unknown',
+      longitude: location.longitude ?? '0',
+      latitude: location.latitude ?? '0', 
+      postUrls,
+    };
+  }
+
   async uploadPosts(
     files: Express.Multer.File[],
     id: string,

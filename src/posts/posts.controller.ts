@@ -68,6 +68,7 @@ import {
   Get,
   Body,
   Req,
+  Param,
   RawBodyRequest,
   UseInterceptors,
   UploadedFiles,
@@ -79,6 +80,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { Buffer } from 'buffer';
 import { Request } from 'express';
 import * as fs from 'fs';
+import { isUUID } from 'class-validator';
 
 @Controller('posts')
 export class PostsController {
@@ -89,6 +91,15 @@ export class PostsController {
   @Get('all')
   async fetchAllPosts() {
     return await this.postsService.fetchAllPosts();
+  }
+
+  @Get(':id')
+  async fetchPostById(@Param('id') id: string) {
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid post ID format');
+    }
+
+    return await this.postsService.fetchPostById(id);
   }
 
   @Post('new')
@@ -104,15 +115,13 @@ export class PostsController {
   ) {
     const { userId, postText, latitude, longitude, locationName, markerImage } = createPostDto;
 
-    console.log('🔹marker image here', markerImage);
-
     if (!markerImage) {
       throw new BadRequestException('No marker image provided');
     }
 
-    if (!files.files || files.files.length === 0) {
-      throw new BadRequestException('No post files uploaded');
-    }
+    // if (!files.files || files.files.length === 0) {
+    //   throw new BadRequestException('No post files uploaded');
+    // }
 
     const result = await this.postsService.uploadPosts(
       files.files, // Post files

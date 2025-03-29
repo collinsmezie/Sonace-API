@@ -16,10 +16,10 @@ export class Post {
   @Column("text", { array: true })
   postUrls: string[]; // S3 URL of the file
 
-  @ManyToOne(() => User, (user) => user.posts, { eager: true })
+  @ManyToOne(() => User, (user) => user.posts)
   user: User;
 
-  @ManyToOne(() => PinnedLocation, (location) => location.id, { eager: true })
+  @ManyToOne(() => PinnedLocation, (location) => location.id)
   location: PinnedLocation;
 
   @CreateDateColumn()
