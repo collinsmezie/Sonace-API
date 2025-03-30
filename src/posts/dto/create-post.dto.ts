@@ -5,7 +5,6 @@ export class CreatePostDto {
   @IsString()
   userId: string;
 
-  @IsString()
   postText: string;
 
   @IsNotEmpty()
