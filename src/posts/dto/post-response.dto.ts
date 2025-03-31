@@ -1,10 +1,19 @@
 export class PostResponseDto {
-    userId: string;
+    postId: string;
     postText: string;
-    postUrls: string[];
-    locationName: string;
+    postType: string;
     longitude: string;
     latitude: string;
-
+    locationName: string;
+    markerImage: string;
+    postUrls: string[];
+    createdAt: Date;
+    textBackgroundColor: number;
+    user: {
+      userId: string;
+      username: string;
+      profileName: string;
+      profileImage: string;
+    };  
   }
   

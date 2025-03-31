@@ -176,17 +176,28 @@ export class PostsService {
     private readonly locationRepository: Repository<PinnedLocation>,
   ) { }
 
-  async fetchAllPosts() {
+  async fetchAllPosts(): Promise<PostResponseDto[] | null> {
     const posts = await this.postRepository.find({
       relations: ['user', 'location'], // Ensure related data is fetched
     });
 
     return posts.map(post => ({
       postId: post.id,
-      markerImage: post.markerImageUrl || post.markerImage || null,
-      createdBy: post.user?.id || null,
-      latitude: post.location?.latitude || null,
-      longitude: post.location?.longitude || null,
+      postText: post.postText,
+      postType: post.postType,
+      longitude: post.location.longitude,
+      latitude: post.location.latitude,
+      locationName: post.location.name,
+      markerImage: post.markerImage,
+      postUrls: post.postUrls,
+      createdAt: post.createdAt,
+      textBackgroundColor: post.textBackgroundColor,
+      user: {
+        userId: post.user.id,
+        username: post.user.username,
+        profileName: post.user.profileName,
+        profileImage: post.user.profileImage,
+      },
     }));
   }
 
@@ -205,54 +216,72 @@ export class PostsService {
     if (!location) throw new NotFoundException('Location associated with post not found');
 
     return {
-      userId: user.id, // Ensure userId matches the correct property name
+      postId: post.id,
       postText,
-      locationName: location.name ?? 'Unknown',
-      longitude: location.longitude ?? '0',
-      latitude: location.latitude ?? '0', 
+      postType: post.postType,
+      longitude: location.longitude,
+      latitude: location.latitude,
+      locationName: location.name,
+      markerImage: post.markerImage,
       postUrls,
+      createdAt: post.createdAt,
+      textBackgroundColor: post.textBackgroundColor,
+      user: {
+        userId: user.id,
+        username: user.username,
+        profileName: user.profileName,
+        profileImage: user.profileImage,
+      },
     };
   }
 
   async uploadPosts(
-    files: Express.Multer.File[],
+    files: Express.Multer.File[] = [],
     id: string,
     postText: string,
     latitude: string,
     longitude: string,
+    markerImage: string,
     locationName?: string,
-    markerImage?: string, // Separate marker image file
+    textBackgroundColor?: number,
+    postType?: string
   ): Promise<{ message: string; postId: string; uploadedImages: string[]; failedUploads: string[] }> {
     // Ensure the user exists
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found - user may have been deleted or does not exist.');
 
-    // Upload all images to S3 in parallel with error handling
-    const uploadResults = await Promise.allSettled(
-      files.map(file => {
-        const key = `posts/${uuidv4()}-${file.originalname}`;
-        return this.uploadToS3(file, key);
-      })
-    );
+    let uploadedImages: string[] = [];
+    let failedUploads: string[] = [];
 
-    // Process upload results
-    const uploadedImages = uploadResults
-      .filter(result => result.status === 'fulfilled')
-      .map(result => (result as PromiseFulfilledResult<string>).value);
+    // Upload files if they are provided
+    if (files.length > 0) {
+      // Upload all images to S3 in parallel with error handling
+      const uploadResults = await Promise.allSettled(
+        files.map(file => {
+          const key = `posts/${uuidv4()}-${file.originalname}`;
+          return this.uploadToS3(file, key);
+        })
+      );
 
-    const failedUploads = uploadResults
-      .filter(result => result.status === 'rejected')
-      .map(result => (result as PromiseRejectedResult).reason.message || 'Unknown error');
+      // Process upload results
+      uploadedImages = uploadResults
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as PromiseFulfilledResult<string>).value);
 
-    // Ensure at least one image was uploaded successfully
-    if (uploadedImages.length === 0) {
-      console.error('[UPLOAD ERROR] All uploads failed:', failedUploads);
-      throw new InternalServerErrorException('Failed to upload any images. Please try again.');
-    }
+      failedUploads = uploadResults
+        .filter(result => result.status === 'rejected')
+        .map(result => (result as PromiseRejectedResult).reason.message || 'Unknown error');
 
-    // Log failed uploads for potential retry logic
-    if (failedUploads.length > 0) {
-      console.warn('[UPLOAD WARNING] Some files failed to upload:', failedUploads);
+      // Ensure at least one image was uploaded successfully
+      if (uploadedImages.length === 0) {
+        console.error('[UPLOAD ERROR] All uploads failed:', failedUploads);
+        throw new InternalServerErrorException('Failed to upload any images. Please try again.');
+      }
+
+      // Log failed uploads for potential retry logic
+      if (failedUploads.length > 0) {
+        console.warn('[UPLOAD WARNING] Some files failed to upload:', failedUploads);
+      }
     }
 
     // Check if the location exists based on latitude, longitude, and userId
@@ -277,7 +306,9 @@ export class PostsService {
       postUrls: uploadedImages,
       user,
       location,
-      markerImage
+      markerImage,
+      textBackgroundColor,
+      postType
     });
 
     const savedPost = await this.postRepository.save(newPost);
@@ -300,7 +331,6 @@ export class PostsService {
   getFullPostUrl(post: Post): string {
     return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${post.postUrls}`;
   }
-
 
 
   private async uploadToS3(file: Express.Multer.File, key: string): Promise<string> {
