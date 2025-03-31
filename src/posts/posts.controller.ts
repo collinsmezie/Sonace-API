@@ -134,7 +134,7 @@ export class PostsController {
       longitude.toString(),
       locationName,
       markerImage,
-      parseInt(textBackgroundColor, 16),
+      parseInt(textBackgroundColor, 16) || null,
       postType,
     );
 
