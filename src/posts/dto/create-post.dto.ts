@@ -1,10 +1,12 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   userId: string;
 
+  @IsOptional()
+  @IsString()
   postText: string;
 
   @IsNotEmpty()
@@ -22,5 +24,13 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   markerImage: string;
+
+  @IsOptional()
+  @IsString()
+  textBackgroundColor?: string;
+
+  @IsOptional()
+  @IsString()
+  postType?: string;
 
 }

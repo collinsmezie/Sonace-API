@@ -30,4 +30,10 @@ export class Post {
 
   @Column("text", { nullable: true })
   markerImage: string;
+
+  @Column({ nullable: true, type: 'bigint' })
+  textBackgroundColor: number;
+
+  @Column("text", { nullable: true })
+  postType: string;
 }

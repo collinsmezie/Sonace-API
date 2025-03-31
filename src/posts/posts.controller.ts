@@ -84,7 +84,7 @@ import { isUUID } from 'class-validator';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   private logFilePath = './logs/requests.log'; // Inside a logs folder
 
@@ -110,27 +110,32 @@ export class PostsController {
     ),
   )
   async createPost(
-    @UploadedFiles() files: { files?: Express.Multer.File[] },
+    @UploadedFiles() files: { files?: Express.Multer.File[] } = {},
     @Body() createPostDto: CreatePostDto,
   ) {
-    const { userId, postText, latitude, longitude, locationName, markerImage } = createPostDto;
+    const { 
+      userId, 
+      postText, 
+      latitude, 
+      longitude, 
+      locationName, 
+      markerImage, 
+      textBackgroundColor,
+      postType
+    } = createPostDto;
 
-    if (!markerImage) {
-      throw new BadRequestException('No marker image provided');
-    }
-
-    // if (!files.files || files.files.length === 0) {
-    //   throw new BadRequestException('No post files uploaded');
-    // }
+    const postFiles = files.files || [];
 
     const result = await this.postsService.uploadPosts(
-      files.files, // Post files
+      postFiles,
       userId,
       postText,
       latitude.toString(),
       longitude.toString(),
       locationName,
       markerImage,
+      parseInt(textBackgroundColor, 16),
+      postType,
     );
 
     return result;
@@ -199,11 +204,11 @@ export class PostsController {
       minute: '2-digit', // e.g., 30
       hour12: true, // Use 12-hour format with AM/PM
     };
-  
+
     const formattedTimestamp = now.toLocaleString('en-US', options); // e.g., Thursday, March 5, 12:30 PM
-  
+
     fs.appendFileSync(this.logFilePath, `[${formattedTimestamp}] ${message}\n`, 'utf8');
   }
-  
+
 
 }
