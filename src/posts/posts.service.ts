@@ -257,6 +257,7 @@ export class PostsService {
 
   }
 
+  
   async uploadPosts(
     files: Express.Multer.File[] = [],
     id: string,
@@ -383,9 +384,5 @@ export class PostsService {
   getFullPostUrl(post: Post): string {
     return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${post.postUrls}`;
   }
-
-
-
-
 }
 
