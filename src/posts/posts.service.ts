@@ -238,27 +238,23 @@ export class PostsService {
     };
   }
 
-  async fetchMapMarkerById(id: string): Promise<Partial<PostResponseDto> | null> {
-    const post = await this.postRepository.findOne({
-      where: { id },
+
+  async fetchPostMarkersById(id: string): Promise<Partial<PostResponseDto>[] | null> {
+    const posts = await this.postRepository.find({
+      where: { user: { id } },
       relations: ['user', 'location'], // Ensure user and location are loaded
     });
 
-    if (!post) throw new NotFoundException('Post not found - post may have been deleted or does not exist.');
+    if (!posts || posts.length === 0) return [];
 
-    // Validate related entities before destructuring
-    const { location, user } = post;
-
-    if (!user) throw new NotFoundException('User associated with post not found');
-    if (!location) throw new NotFoundException('Location associated with post not found');
-
-    return {
+    return posts.map(post => ({
       postId: post.id,
       markerImage: post.markerImage,
-      longitude: location.longitude,
-      latitude: location.latitude,
-      createdBy: user.id,
-    };
+      longitude: post.location.longitude,
+      latitude: post.location.latitude,
+      createdBy: post.user.id,
+    }));
+
   }
 
   async uploadPosts(
