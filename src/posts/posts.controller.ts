@@ -102,6 +102,15 @@ export class PostsController {
     return await this.postsService.fetchPostById(id);
   }
 
+  @Get('map-marker/:id')
+  async fetchMapMarkerById(@Param('id') id: string) {
+    if (!isUUID(id)) {
+      throw new BadRequestException('Invalid post ID format');
+    }
+
+    return await this.postsService.fetchMapMarkerById(id);
+  }
+
   @Post('new')
   @UseInterceptors(
     FileFieldsInterceptor(

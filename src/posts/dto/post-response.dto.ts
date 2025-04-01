@@ -8,6 +8,7 @@ export class PostResponseDto {
     markerImage: string;
     postUrls: string[];
     createdAt: Date;
+    createdBy: string;
     textBackgroundColor: number;
     user: {
       userId: string;
