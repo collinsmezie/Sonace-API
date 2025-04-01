@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 
 import { TypeOrmModule } from '@nestjs/typeorm';  
-import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
 import { User } from './users/entities/user.entity';
 import { Post } from './posts/entities/post.entity';
 import { PinnedLocation } from './pinned-locations/entities/pinned-location.entity';
@@ -88,7 +88,7 @@ export class AppModule implements NestModule {
 // import { AppService } from './app.service';
 // import { UsersModule } from './users/users.module';
 // import { TypeOrmModule } from '@nestjs/typeorm';  
-// import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+// import { LoggerMiddleware } from './shared/middlewares/logger.middleware';
 // // import { logger } from './middlewares/logger.middleware';
 // import { AuthModule } from './auth/auth.module';
 // import { APP_GUARD } from '@nestjs/core';

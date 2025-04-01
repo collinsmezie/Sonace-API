@@ -157,11 +157,10 @@ import { Post } from './entities/post.entity';
 import { User } from './../users/entities/user.entity';
 import { PinnedLocation } from './../pinned-locations/entities/pinned-location.entity';
 import { S3Client, PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
-import { s3 } from '../config/s3.config';
+import { s3 } from '../shared/s3/s3.config';
 import { v4 as uuidv4 } from 'uuid';
 import { PostResponseDto } from './dto/post-response.dto';
-import { use } from 'passport';
-
+import { S3Service } from '../shared/s3/s3.service';
 
 @Injectable()
 export class PostsService {
@@ -175,6 +174,7 @@ export class PostsService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(PinnedLocation)
     private readonly locationRepository: Repository<PinnedLocation>,
+    private readonly s3Service: S3Service,
   ) { }
 
   async fetchAllPosts(): Promise<Partial<PostResponseDto>[] | []> {
@@ -267,12 +267,12 @@ export class PostsService {
     locationName?: string,
     textBackgroundColor?: number,
     postType?: string
-  ): Promise<{ message: string; postId: string; uploadedImages: string[]; failedUploads: string[] }> {
+  ): Promise<{ message: string; postId: string; uploadedFiles: string[]; failedUploads: string[] }> {
     // Ensure the user exists
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found - user may have been deleted or does not exist.');
 
-    let uploadedImages: string[] = [];
+    let uploadedFiles: string[] = [];
     let failedUploads: string[] = [];
 
     // Upload files if they are provided
@@ -281,12 +281,12 @@ export class PostsService {
       const uploadResults = await Promise.allSettled(
         files.map(file => {
           const key = `posts/${uuidv4()}-${file.originalname}`;
-          return this.uploadToS3(file, key);
+          return this.s3Service.uploadToS3(file, key);
         })
       );
 
       // Process upload results
-      uploadedImages = uploadResults
+      uploadedFiles = uploadResults
         .filter(result => result.status === 'fulfilled')
         .map(result => (result as PromiseFulfilledResult<string>).value);
 
@@ -295,9 +295,9 @@ export class PostsService {
         .map(result => (result as PromiseRejectedResult).reason.message || 'Unknown error');
 
       // Ensure at least one image was uploaded successfully
-      if (uploadedImages.length === 0) {
+      if (uploadedFiles.length === 0) {
         console.error('[UPLOAD ERROR] All uploads failed:', failedUploads);
-        throw new InternalServerErrorException('Failed to upload any images. Please try again.');
+        throw new InternalServerErrorException('Failed to upload any files. Please try again.');
       }
 
       // Log failed uploads for potential retry logic
@@ -325,7 +325,7 @@ export class PostsService {
     // Create and save the new post
     const newPost = this.postRepository.create({
       postText,
-      postUrls: uploadedImages,
+      postUrls: uploadedFiles,
       user,
       location,
       markerImage,
@@ -344,9 +344,39 @@ export class PostsService {
     return {
       message,
       postId: savedPost.id,
-      uploadedImages,
+      uploadedFiles,
       failedUploads,
     };
+  }
+
+
+  async deleteAllPosts(): Promise<{ message: string; deletedPosts: number }> {
+    try {
+      const posts = await this.postRepository.find();
+      if (posts.length === 0) {
+        return { message: 'No posts to delete', deletedPosts: 0 };
+      }
+
+      // Delete entire "posts/" and "markers/" folders in S3
+      const failedPrefixes = await this.s3Service.deleteFolder(['posts/']);
+
+      // If all prefixes failed, do not delete posts
+      if (failedPrefixes.length > 0) {
+        throw new InternalServerErrorException(`Failed to delete folders: ${failedPrefixes.join(', ')}`);
+      }
+
+      // Delete all posts from the database
+      await this.postRepository.delete({});
+
+      return {
+        message: 'All posts deleted successfully',
+        deletedPosts: posts.length,
+      };
+    } catch (error) {
+      // this.logger.error('Failed to delete posts', error.stack);
+      console.error('Failed to delete posts:', error);
+      throw new InternalServerErrorException('Error deleting posts. Please try again later.');
+    }
   }
 
 
@@ -355,29 +385,7 @@ export class PostsService {
   }
 
 
-  private async uploadToS3(file: Express.Multer.File, key: string): Promise<string> {
 
-    if (file.originalname.includes("fail")) {
-      throw new Error(`Failed to upload - ${file.originalname}`);
-    }
-
-    try {
-      const uploadParams: PutObjectCommandInput = {
-        Bucket: this.bucketName,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      };
-
-      await s3.send(new PutObjectCommand(uploadParams));
-
-      // Return the full URL
-      return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${key}`;
-    } catch (error) {
-      console.error('[S3] Error uploading file(s) to S3:', error);
-      throw new InternalServerErrorException('Failed to upload file(s). Please try again later.');
-    }
-  }
 
 }
 
