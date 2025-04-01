@@ -160,6 +160,7 @@ import { S3Client, PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/clie
 import { s3 } from '../config/s3.config';
 import { v4 as uuidv4 } from 'uuid';
 import { PostResponseDto } from './dto/post-response.dto';
+import { use } from 'passport';
 
 
 @Injectable()
@@ -176,10 +177,12 @@ export class PostsService {
     private readonly locationRepository: Repository<PinnedLocation>,
   ) { }
 
-  async fetchAllPosts(): Promise<PostResponseDto[] | null> {
+  async fetchAllPosts(): Promise<Partial<PostResponseDto>[] | []> {
     const posts = await this.postRepository.find({
       relations: ['user', 'location'], // Ensure related data is fetched
     });
+
+    if (!posts || posts.length === 0) return [];
 
     return posts.map(post => ({
       postId: post.id,
@@ -201,13 +204,13 @@ export class PostsService {
     }));
   }
 
-  async fetchPostById(id: string): Promise<PostResponseDto | null> {
+  async fetchPostById(id: string): Promise<Partial<PostResponseDto> | null> {
     const post = await this.postRepository.findOne({
       where: { id },
       relations: ['user', 'location'], // Ensure user and location are loaded
     });
 
-    if (!post) throw new NotFoundException('Post not found');
+    if (!post) throw new NotFoundException('Post not found - post may have been deleted or does not exist.');
 
     // Validate related entities before destructuring
     const { postText, postUrls, location, user } = post;
@@ -232,6 +235,29 @@ export class PostsService {
         profileName: user.profileName,
         profileImage: user.profileImage,
       },
+    };
+  }
+
+  async fetchMapMarkerById(id: string): Promise<Partial<PostResponseDto> | null> {
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['user', 'location'], // Ensure user and location are loaded
+    });
+
+    if (!post) throw new NotFoundException('Post not found - post may have been deleted or does not exist.');
+
+    // Validate related entities before destructuring
+    const { location, user } = post;
+
+    if (!user) throw new NotFoundException('User associated with post not found');
+    if (!location) throw new NotFoundException('Location associated with post not found');
+
+    return {
+      postId: post.id,
+      markerImage: post.markerImage,
+      longitude: location.longitude,
+      latitude: location.latitude,
+      createdBy: user.id,
     };
   }
 
