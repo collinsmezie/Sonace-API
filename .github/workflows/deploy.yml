@@ -28,6 +28,51 @@
 #           EOF
 
 
+
+
+
+# name: Deploy Sonace API to EC2
+
+# on:
+#   push:
+#     branches:
+#       - dev
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up SSH key
+#         run: |
+#           mkdir -p ~/.ssh
+#           echo -e "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+#           chmod 600 ~/.ssh/id_rsa
+#           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+#         shell: bash
+
+#       - name: Debug SSH key setup
+#         run: |
+#           ls -la ~/.ssh
+#           head -n 5 ~/.ssh/id_rsa
+#           cat ~/.ssh/known_hosts
+#         shell: bash
+
+#       - name: Deploy to EC2
+#         run: |
+#           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+#           cd ~
+#           chmod +x deploy_sonace.sh  # Ensure script is executable
+#           ./deploy_sonace.sh
+#           EOF
+#         shell: bash
+
+
+
+
 name: Deploy Sonace API to EC2
 
 on:
@@ -46,7 +91,7 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo -e "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
         shell: bash
@@ -58,9 +103,14 @@ jobs:
           cat ~/.ssh/known_hosts
         shell: bash
 
+      - name: Test SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful'"
+        shell: bash
+
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           cd ~
           chmod +x deploy_sonace.sh  # Ensure script is executable
           ./deploy_sonace.sh
