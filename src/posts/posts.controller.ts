@@ -66,8 +66,12 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
   Body,
   Req,
+  HttpException,
+  HttpCode,
+  HttpStatus,
   Param,
   RawBodyRequest,
   UseInterceptors,
@@ -148,6 +152,22 @@ export class PostsController {
     );
 
     return result;
+  }
+
+  // @Delete('delete-all')
+  // async deleteAllPosts() {
+  //   try {
+  //     return await this.postsService.deleteAllPosts();
+  //   } catch (error) {
+  //     console.error('Error deleting all posts:', error);
+  //     throw new HttpException('Failed to delete posts', HttpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+  // }
+
+  @Delete('delete-all')
+  @HttpCode(HttpStatus.OK)
+  async deleteAllPosts() {
+    return await this.postsService.deleteAllPosts();
   }
 
 

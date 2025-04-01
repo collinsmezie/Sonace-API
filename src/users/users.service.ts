@@ -7,7 +7,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { S3Client, PutObjectCommand, DeleteObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
-import { s3 } from '../config/s3.config';
+import { s3 } from '../shared/s3/s3.config';
+import { S3Service } from '../shared/s3/s3.service';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,9 @@ export class UsersService {
   private readonly region = process.env.AWS_REGION;
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>
+    private usersRepository: Repository<User>,
+    private readonly s3Service: S3Service,
+
   ) { }
 
   async updateUser(
@@ -33,7 +36,7 @@ export class UsersService {
     // If a file is uploaded, update profile image
     if (file) {
       if (user.profileImage) {
-        await this.deleteFromS3(user.profileImage);
+        await this.s3Service.deleteFromS3(user.profileImage);
       }
   
       const key = `profile-images/${uuidv4()}-${file.originalname}`;
@@ -73,15 +76,6 @@ export class UsersService {
     }
   }
 
-  private async deleteFromS3(key: string): Promise<void> {
-    try {
-      await s3.send(new DeleteObjectCommand({ Bucket: this.bucketName, Key: key }));
-    } catch (error) {
-      console.error('Error deleting old profile image from S3:', error);
-      throw new InternalServerErrorException('Failed to delete old profile image.');
-    }
-  }
-
 
   async create(createUserDto: CreateUserDto) {
     // Check if the user exists in the database
@@ -108,7 +102,7 @@ export class UsersService {
 
     if (!user) {
       // If no user is found, throw a NotFoundException
-      throw new NotFoundException(`User not found - Provide a valid or registered email`);
+      throw new NotFoundException(`Provide a valid registered email`);
     }
 
     return user;
