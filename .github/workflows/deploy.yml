@@ -1,78 +1,3 @@
-# name: Deploy Sonace API to EC2
-
-# on:
-#   push:
-#     branches:
-#       - dev
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Set up SSH key
-#         run: |
-#           mkdir -p ~/.ssh
-#           cat <<EOF > ~/.ssh/id_rsa
-#           ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-#           EOF
-#           chmod 600 ~/.ssh/id_rsa
-#           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
-
-#       - name: Deploy to EC2
-#         run: |
-#           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-#           cd ~
-#           chmod +x deploy_sonace.sh  # Ensure script is executable
-#           ./deploy_sonace.sh
-#           EOF
-
-
-
-
-
-# name: Deploy Sonace API to EC2
-
-# on:
-#   push:
-#     branches:
-#       - dev
-
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v4
-
-#       - name: Set up SSH key
-#         run: |
-#           mkdir -p ~/.ssh
-#           echo -e "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-#           chmod 600 ~/.ssh/id_rsa
-#           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
-#         shell: bash
-
-#       - name: Debug SSH key setup
-#         run: |
-#           ls -la ~/.ssh
-#           head -n 5 ~/.ssh/id_rsa
-#           cat ~/.ssh/known_hosts
-#         shell: bash
-
-#       - name: Deploy to EC2
-#         run: |
-#           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-#           cd ~
-#           chmod +x deploy_sonace.sh  # Ensure script is executable
-#           ./deploy_sonace.sh
-#           EOF
-#         shell: bash
-
-
-
-
 name: Deploy Sonace API to EC2
 
 on:
@@ -85,8 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: |
+          NODE_OPTIONS="--max-old-space-size=2048" npm run build
+
+      - name: Archive production files
+        run: |
+          mkdir deploy
+          cp -r package.json package-lock.json dist deploy/
+          cd deploy && zip -r sonace-api.zip .
 
       - name: Set up SSH key
         run: |
@@ -94,25 +37,11 @@ jobs:
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
-        shell: bash
 
-      - name: Debug SSH key setup
+      - name: Transfer build to EC2
         run: |
-          ls -la ~/.ssh
-          head -n 5 ~/.ssh/id_rsa
-          cat ~/.ssh/known_hosts
-        shell: bash
+          scp deploy/sonace-api.zip ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/sonace-api.zip
 
-      - name: Test SSH connection
+      - name: Run deploy script on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH connection successful'"
-        shell: bash
-
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd ~
-          chmod +x deploy_sonace.sh  # Ensure script is executable
-          ./deploy_sonace.sh
-          EOF
-        shell: bash
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'bash ~/deploy_sonace.sh'
