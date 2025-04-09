@@ -10,19 +10,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: |
+          NODE_OPTIONS="--max-old-space-size=2048" npm run build
+
+      - name: Archive production files
+        run: |
+          mkdir deploy
+          cp -r package.json package-lock.json dist deploy/
+          cd deploy && zip -r sonace-api.zip .
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          cat <<EOF > ~/.ssh/id_rsa
-          ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          EOF
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy to EC2
+      - name: Transfer build to EC2
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          cd ~
-          chmod +x deploy_sonace.sh  # Ensure script is executable
-          ./deploy_sonace.sh
-          EOF
+          scp deploy/sonace-api.zip ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/sonace-api.zip
+
+      - name: Run deploy script on EC2
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'bash ~/deploy_sonace.sh'
